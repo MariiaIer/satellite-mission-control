@@ -1,0 +1,128 @@
+/* src/app/components/space-console/space-console.component.css */
+.terminal-container {
+  background-color: #0d1117;
+  color: #00ff66;
+  font-family: 'Courier New', Courier, monospace;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  height: 550px;
+}
+
+.terminal-header {
+  background-color: #161b22;
+  padding: 10px 16px;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ff4d4d;
+}
+
+.dot.connected {
+  background-color: #00ff66;
+  box-shadow: 0 0 8px #00ff66;
+}
+
+.clear-btn {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.clear-btn:hover { color: #fff; }
+
+.terminal-logs {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.log-entry {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.timestamp { color: #8b949e; margin-right: 8px; }
+.tag { font-weight: bold; margin-right: 6px; }
+
+.tag.system { color: #58a6ff; }
+.tag.user { color: #e36049; }
+.tag.telemetry { color: #d2a8ff; }
+
+.tag.notif.info { color: #7ee787; }
+.tag.notif.warning { color: #f2cc60; }
+.tag.notif.critical { color: #ff7b72; }
+
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 6px;
+  margin-top: 4px;
+  padding-left: 20px;
+  color: #8b949e;
+}
+
+.sat-item {
+  background: #161b22;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.terminal-input-form {
+  display: flex;
+  background-color: #161b22;
+  border-top: 1px solid #30363d;
+  padding: 8px 16px;
+  align-items: center;
+}
+
+.prompt { color: #00ff66; margin-right: 8px; font-weight: bold; }
+
+input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+button[type="submit"] {
+  background-color: #238636;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button[type="submit"]:disabled {
+  background-color: #21262d;
+  color: #8b949e;
+  cursor: not-allowed;
+}

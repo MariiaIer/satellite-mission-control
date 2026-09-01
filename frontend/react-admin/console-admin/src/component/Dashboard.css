@@ -1,0 +1,105 @@
+.telemetry-container {
+  background-color: #0d1117;
+  color: #c9d1d9;
+  padding: 24px;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.telemetry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.telemetry-header h2 {
+  margin: 0;
+  color: #f0f6fc;
+}
+
+.satellite-id {
+  color: #8b949e;
+  font-weight: normal;
+  font-size: 0.9em;
+}
+
+.timestamp {
+  font-size: 12px;
+  color: #8b949e;
+}
+
+.table-wrapper {
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.telemetry-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.telemetry-table th {
+  background-color: #161b22;
+  color: #8b949e;
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid #30363d;
+}
+
+.telemetry-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #21262d;
+  font-size: 14px;
+}
+
+.telemetry-table tr:last-child td {
+  border-bottom: none;
+}
+
+.telemetry-table tr:hover {
+  background-color: #161b22;
+}
+
+.metric-title {
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.value-badge {
+  background-color: #21262d;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: #e6edf3;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Статусы */
+.status-green { color: #3fb950; }
+.status-green .status-dot { background-color: #3fb950; box-shadow: 0 0 6px #3fb950; }
+
+.status-yellow { color: #d29922; }
+.status-yellow .status-dot { background-color: #d29922; box-shadow: 0 0 6px #d29922; }
+
+.status-red { color: #f85149; }
+.status-red .status-dot { background-color: #f85149; box-shadow: 0 0 6px #f85149; }
+
+.range-text {
+  color: #8b949e;
+  font-family: monospace;
+}

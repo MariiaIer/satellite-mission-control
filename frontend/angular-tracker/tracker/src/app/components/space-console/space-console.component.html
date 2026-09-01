@@ -1,0 +1,71 @@
+@if (isAuth()) {
+  <div class="terminal-container">
+    <!-- Console Header -->
+    <div class="terminal-header">
+      <div class="status-indicator">
+        <span class="dot" [class.connected]="isConnected()"></span>
+        <span>{{ isConnected() ? 'MCC ONLINE' : 'CONNECTING...' }}</span>
+      </div>
+      <div class="terminal-title">TERMINAL // SPACE_TELEMETRY_V1</div>
+      <button class="clear-btn" (click)="clearConsole()">Clear</button>
+    </div>
+
+    <!-- Logs Block -->
+    <div class="terminal-logs" #scrollContainer>
+      @for (log of logs(); track $index) {
+        <div class="log-entry" [class]="log.type.toLowerCase()">
+          <span class="timestamp">[{{ log.timestamp | date:'HH:mm:ss' }}]</span>
+
+          @if (log.type === 'SYSTEM') {
+            <span class="tag system">[SYSTEM]</span> {{ log.message }}
+          }
+
+          @if (log.type === 'USER_COMMAND') {
+            <span class="tag user">[OUTGOING]</span> &gt; {{ log.message }}
+          }
+
+          @if (log.type === 'NOTIFICATION') {
+            <span class="tag notif" [class]="log.data?.severity">
+              [{{ log.data?.severity | uppercase }}]
+            </span> 
+            {{ log.data?.message }}
+          }
+
+          @if (log.type === 'TELEMETRY_TRAJECTORY') {
+            <span class="tag telemetry">[TRAJECTORY]</span>
+            <div class="telemetry-grid">
+              @for (sat of log.data; track sat.id) {
+                <div class="sat-item">
+                  <strong>{{ sat.id }}</strong>: Lat {{ sat.latitude }}°, Lng {{ sat.longitude }}° | {{ sat.velocityKmS }} km/s
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Input Field -->
+    <form class="terminal-input-form" (ngSubmit)="sendCommand()">
+      <span class="prompt">&gt;</span>
+      <input 
+        type="text" 
+        [ngModel]="inputCommand()" 
+        (ngModelChange)="inputCommand.set($event)"
+        name="command" 
+        placeholder="Enter command for server..."
+        [disabled]="!isConnected()"
+        autocomplete="off"
+      />
+      <button type="submit" [disabled]="!isConnected() || !inputCommand().trim()">Send</button>
+    </form>
+  </div>
+} @else {
+  <!-- Placeholder for unauthorized users -->
+  <div class="auth-warning-container">
+    <div class="auth-warning-card">
+      <h2>🔒 Access Restricted</h2>
+      <p>Please log in to view satellite telemetry and access the control terminal.</p>
+    </div>
+  </div>
+}

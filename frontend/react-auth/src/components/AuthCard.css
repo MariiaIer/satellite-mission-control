@@ -1,0 +1,162 @@
+
+
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border: 1.5px solid #2d8182;
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  background-color: #248181;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.logo-icon {
+  width: 24px;
+  height: 24px;
+  background-color: #72e3d3;
+  border-radius: 4px;
+}
+
+.brand-name {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333333;
+}
+
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222222;
+  margin-bottom: 24px;
+}
+
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  color: #444444;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: #d9534f;
+}
+
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  outline: none;
+  color: #333333;
+  transition: border-color 0.2s;
+}
+
+.input::placeholder {
+  color: #b0b8c1;
+}
+
+.input:focus {
+  border-color: #2d8182;
+}
+
+
+.input-password-group {
+  display: flex;
+  width: 100%;
+}
+
+.input-password-group .input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+.toggle-password {
+  background-color: #f8fafc;
+  border: 1px solid #dcdfe6;
+  border-left: none;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  padding: 0 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2d8182;
+}
+
+
+.forgot-password {
+  display: block;
+  text-align: right;
+  font-size: 14px;
+  color: #555555;
+  text-decoration: underline;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.forgot-password:hover {
+  color: #2d8182;
+}
+
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-primary {
+  background-color: #248181;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.btn-secondary {
+  background-color: #dbe4ed;
+  color: #222222;
+}

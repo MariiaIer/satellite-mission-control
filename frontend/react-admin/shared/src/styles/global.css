@@ -1,0 +1,21 @@
+:root {
+  --primary: #248181;
+  --bg-color: #f5f7f8;
+  --sidebar-width: 240px;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background-color: var(--bg-color);
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: 60px 1fr;
+  grid-template-areas:
+    "header  header"
+    "sidebar content";
+  min-height: 100vh;
+}

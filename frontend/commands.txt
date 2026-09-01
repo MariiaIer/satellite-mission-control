@@ -1,0 +1,10 @@
+Run built applications with a single command:
+
+Bash
+npm run start:all
+
+
+Rebuild everything at once if necessary:
+
+Bash
+npm run build:all

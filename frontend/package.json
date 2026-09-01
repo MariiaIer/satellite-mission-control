@@ -1,0 +1,27 @@
+{
+  "name": "cosmos-frontend",
+  "private": true,
+  "workspaces": [
+    "shell-host/shell",
+    "react-admin/console-admin",
+    "react-admin/shared",
+    "react-auth"
+  ],
+  "scripts": {
+    "build:all": "npm --prefix react-admin/shared run build && npm --prefix react-auth run build && npm --prefix react-admin/console-admin run build && npm --prefix angular-tracker/tracker run build && npm --prefix shell-host/shell run build",
+    "start:all": "concurrently \"npm --prefix react-admin/shared run start\" \"npm --prefix react-auth run start\" \"npm --prefix react-admin/console-admin run start\" \"npm --prefix angular-tracker/tracker run start\" \"npm --prefix shell-host/shell run start\""
+  },
+  "devDependencies": {
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
+    "@babel/preset-react": "^8.0.1",
+    "babel-loader": "^10.1.1",
+    "concurrently": "^8.2.2",
+    "css-loader": "^7.1.5",
+    "html-webpack-plugin": "^5.6.8",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.110.1",
+    "webpack-cli": "^7.2.3",
+    "webpack-dev-server": "^6.0.0"
+  }
+}
