@@ -38,6 +38,7 @@ module.exports = {
         authApp: 'authApp@http://localhost:5001/remoteEntry.js',
         adminApp: 'adminApp@http://localhost:5002/remoteEntry.js',
         sharedApp: 'sharedApp@http://localhost:5003/remoteEntry.js',
+        angularTracker: 'angularTracker@http://localhost:5004/remoteEntry.js'
       },
       shared: {
         react: { singleton: true, eager: true, requiredVersion: '19.2.8' },

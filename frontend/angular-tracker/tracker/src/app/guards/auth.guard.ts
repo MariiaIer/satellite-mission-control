@@ -5,15 +5,15 @@ import { CanActivateFn, Router, RedirectCommand } from '@angular/router';
 export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
   
-  // Проверяем наличие токена
+  // Check for the presence of the token
   const token = localStorage.getItem('token');
 
   if (token) {
     return true;
   }
 
-  console.warn('[AuthGuard] Доступ ограничен: отсутствует токен авторизации.');
+  console.warn('[AuthGuard] Access restricted: missing authorization token.');
 
-  // Использование RedirectCommand — современный стандарт отмены навигации и перенаправления
+  // Using RedirectCommand — modern standard for canceling navigation and redirecting
   return false;
 };

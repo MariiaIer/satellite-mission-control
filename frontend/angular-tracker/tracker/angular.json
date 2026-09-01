@@ -14,55 +14,86 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-architects/native-federation:build",
           "options": {
-            "customWebpackConfig": {
-              "path": "./webpack.config.js"
-            },
-            "outputPath": "dist/tracker",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": ["src/polyfills.ts"],
-            "extractLicenses": false,
-            "tsConfig": "tsconfig.app.json",
-            "assets": [],
-            "styles": [
-              "src/styles.css"
-            ],
-            "scripts": []
+            "target": "tracker:esbuild:production",
+            "federationConfig": "federation.config.js", 
+            "cacheExternalArtifacts": false,
+            "tsConfig": "tsconfig.federation.json",
+            "skipRemoteChecking": true
           },
           "configurations": {
             "production": {
-              "extractLicenses": false,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "1MB",
-                  "maximumError": "2MB"
-                }
-              ],
-              "outputHashing": "all"
+              "target": "tracker:esbuild:production",
+              "dev": false
             },
             "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
+              "target": "tracker:esbuild:development",
+              "dev": false
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular-architects/native-federation:build",
           "options": {
+            "target": "tracker:serve-original:development",
+            "federationConfig": "federation.config.js", 
+            "rebuildDelay": 500,
+            "dev": true,
+            "devServer": true,
             "port": 5004,
-            "buildTarget": "tracker:build"
+            "headers": {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+              "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
+            }
+          }
+        },
+        "esbuild": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist-app/tracker",
+            "index": "src/index.html",
+            "polyfills": ["src/polyfills.ts", "es-module-shims"],
+            "tsConfig": "tsconfig.app.json",
+            "assets": [],
+            "styles": ["src/styles.css"],
+            "scripts": [],
+            "browser": "src/main.ts"
           },
           "configurations": {
-            "production": {
-              "buildTarget": "tracker:build:production"
-            },
             "development": {
-              "buildTarget": "tracker:build:development"
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
+            "production": {
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "serve-original": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 5004,
+            "buildTarget": "tracker:esbuild:development",
+            "headers": {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+              "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
+            }
+          },
+          "configurations": {
+            "development": {
+              "buildTarget": "tracker:esbuild:development"
+            },
+            "production": {
+              "buildTarget": "tracker:esbuild:production"
             }
           },
           "defaultConfiguration": "development"

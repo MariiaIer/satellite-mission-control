@@ -1,13 +1,25 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
+import { createApplication } from '@angular/platform-browser';
+import { createCustomElement } from '@angular/elements';
 import { SpaceConsoleComponent } from './app/components/space-console/space-console.component';
+import { appConfig } from './app/app.config';
 
-export function mountTracker(container: HTMLElement) {
-  container.innerHTML = '';
-  const appElement = document.createElement('app-space-console');
-  container.appendChild(appElement);
+export async function mount(container: HTMLElement, props: { token?: string } = {}) {
+  const appRef = await createApplication(appConfig);
+  
+  if (!customElements.get('angular-tracker-element')) {
+    const trackerElement = createCustomElement(SpaceConsoleComponent, {
+      injector: appRef.injector,
+    });
+    customElements.define('angular-tracker-element', trackerElement);
+  }
 
-  return bootstrapApplication(SpaceConsoleComponent, appConfig);
+  let element = container.querySelector('angular-tracker-element');
+  if (!element) {
+    element = document.createElement('angular-tracker-element');
+    container.appendChild(element);
+  }
+
+  if (props.token) {
+    element.setAttribute('token', props.token);
+  }
 }
-
-export default mountTracker;

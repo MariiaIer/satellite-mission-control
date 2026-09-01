@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy, ElementRef, inject, signal, effect, viewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, inject, signal, effect, viewChild, ViewEncapsulation } from '@angular/core';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SpaceConsoleService } from '../../services/space-console.service';
 
 @Component({
   selector: 'app-space-console',
-  standalone: true,
+  encapsulation: ViewEncapsulation.ShadowDom,
   imports: [FormsModule, DatePipe, UpperCasePipe],
   templateUrl: './space-console.component.html',
   styleUrl: './space-console.component.css'

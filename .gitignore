@@ -3,6 +3,11 @@
 node_modules/
 
 
+frontend/angular-tracker/tracker/dist-app/
+**/dist-app/
+**/dist/
+
+
 **/.env
 .env
 .env.*
