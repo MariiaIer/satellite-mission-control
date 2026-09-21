@@ -126,3 +126,7 @@ button[type="submit"]:disabled {
   color: #8b949e;
   cursor: not-allowed;
 }
+
+.uppercase {
+  text-transform: uppercase;
+}

@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, DestroyRef } from '@angular/core';
 import { Router } from '@angular/router';
 
 export interface SpaceMessage {
@@ -12,22 +12,27 @@ export interface SpaceMessage {
   providedIn: 'root'
 })
 export class SpaceConsoleService {
-  private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  
   private socket?: WebSocket;
 
-  // 1. Internal private WritableSignals
-  private tokenSignal = signal<string | null>(localStorage.getItem('token'));
-  private isConnectedSignal = signal<boolean>(false);
-  private logsSignal = signal<SpaceMessage[]>([]);
+  // Maximum number of logs retained in memory to prevent performance degradation
+  private readonly MAX_LOGS_LIMIT = 1000;
 
-  // 2. Public ReadonlySignals for the component
-  public readonly isAuth = signal<boolean>(!!this.tokenSignal()).asReadonly();
+  // 1. Internal private WritableSignals
+  private readonly tokenSignal = signal<string | null>(localStorage.getItem('token'));
+  private readonly isConnectedSignal = signal<boolean>(false);
+  private readonly logsSignal = signal<SpaceMessage[]>([]);
+
+  // 2. Public ReadonlySignals
+  // FIXED: Using computed() ensures isAuth stays reactive when tokenSignal changes
+  public readonly isAuth = computed(() => !!this.tokenSignal());
   public readonly isConnected = this.isConnectedSignal.asReadonly();
   public readonly logs = this.logsSignal.asReadonly();
 
   constructor() {
-    // Listen for token changes from the React microfrontend
-    window.addEventListener('auth-change', (event: Event) => {
+    const handleAuthChange = (event: Event) => {
       const customEvent = event as CustomEvent<{ token: string | null }>;
       const newToken = customEvent.detail?.token ?? localStorage.getItem('token');
       
@@ -40,15 +45,26 @@ export class SpaceConsoleService {
       } else {
         this.connect();
       }
+    };
+
+    // Listen for token changes from microfrontends
+    window.addEventListener('auth-change', handleAuthChange);
+
+    // Clean up event listener when service scope is destroyed
+    this.destroyRef.onDestroy(() => {
+      window.removeEventListener('auth-change', handleAuthChange);
+      this.disconnect();
     });
   }
 
   // WebSocket connection
   connect(url: string = 'ws://localhost:3000'): void {
-    const token = localStorage.getItem('token');
+    const token = this.tokenSignal();
     if (!token) return;
 
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) return;
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
 
     this.socket = new WebSocket(`${url}?token=${token}`);
 
@@ -75,7 +91,7 @@ export class SpaceConsoleService {
     };
   }
 
-  // Send message (fixes TS2339: sendMessage error)
+  // Send message
   sendMessage(userMessage: string): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       this.addSystemLog('Error: no connection to server.');
@@ -92,7 +108,7 @@ export class SpaceConsoleService {
     this.addMessage(payload);
   }
 
-  // Clear logs (fixes TS2339: clearLogs error)
+  // Clear logs
   clearLogs(): void {
     this.logsSignal.set([]);
   }
@@ -105,9 +121,15 @@ export class SpaceConsoleService {
     }
   }
 
-  // Private helper methods
+  // Helper method with memory buffer limit
   private addMessage(msg: SpaceMessage): void {
-    this.logsSignal.update((currentLogs) => [...currentLogs, msg]);
+    this.logsSignal.update((currentLogs) => {
+      const updated = [...currentLogs, msg];
+      // Keep only the last MAX_LOGS_LIMIT records
+      return updated.length > this.MAX_LOGS_LIMIT 
+        ? updated.slice(updated.length - this.MAX_LOGS_LIMIT) 
+        : updated;
+    });
   }
 
   private addSystemLog(text: string): void {

@@ -1,46 +1,63 @@
-import { Component, OnInit, OnDestroy, ElementRef, inject, signal, effect, viewChild, ViewEncapsulation } from '@angular/core';
-import { DatePipe, UpperCasePipe } from '@angular/common';
+import { 
+  Component, 
+  viewChild, 
+  ViewEncapsulation, 
+  inject, 
+  DestroyRef, 
+  afterNextRender, 
+  afterRenderEffect, 
+  signal 
+} from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SpaceConsoleService } from '../../services/space-console.service';
+import { ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { SpaceConsoleService, SpaceMessage } from '../../services/space-console.service';
 
 @Component({
   selector: 'app-space-console',
   encapsulation: ViewEncapsulation.ShadowDom,
-  imports: [FormsModule, DatePipe, UpperCasePipe],
+  imports: [FormsModule, DatePipe, ScrollingModule],
   templateUrl: './space-console.component.html',
   styleUrl: './space-console.component.css'
 })
-export class SpaceConsoleComponent implements OnInit, OnDestroy {
-  private consoleService = inject(SpaceConsoleService);
+export class SpaceConsoleComponent {
+  private readonly consoleService = inject(SpaceConsoleService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
+  private readonly viewport = viewChild<CdkVirtualScrollViewport>(CdkVirtualScrollViewport);
 
-  inputCommand = signal('');
+  readonly inputCommand = signal('');
 
-  isAuth = this.consoleService.isAuth;
-  isConnected = this.consoleService.isConnected;
-  logs = this.consoleService.logs;
+  readonly isAuth = this.consoleService.isAuth;
+  readonly isConnected = this.consoleService.isConnected;
+  readonly logs = this.consoleService.logs;
 
   constructor() {
-    effect(() => {
-      this.logs();
-      const container = this.scrollContainer()?.nativeElement;
-      if (container) {
-        requestAnimationFrame(() => {
-          container.scrollTop = container.scrollHeight;
-        });
+    afterNextRender(() => {
+      if (this.isAuth()) {
+        this.consoleService.connect();
+      }
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.consoleService.disconnect();
+    });
+
+    afterRenderEffect(() => {
+      const logsCount = this.logs().length;
+      const vp = this.viewport();
+
+      if (vp && logsCount > 0) {
+        vp.scrollToIndex(logsCount - 1, 'smooth');
       }
     });
   }
 
-  ngOnInit(): void {
-    if (this.isAuth()) {
-      this.consoleService.connect();
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.consoleService.disconnect();
+  /**
+   * TrackBy function required for cdkVirtualFor performance optimization
+   */
+  trackByTimestamp(index: number, item: SpaceMessage): string | number {
+    return item?.timestamp ?? index;
   }
 
   sendCommand(): void {
