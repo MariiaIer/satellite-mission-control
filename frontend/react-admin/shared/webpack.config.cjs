@@ -49,6 +49,7 @@ module.exports = {
         './Header': './src/components/Header.jsx',
         './Sidebar': './src/components/Sidebar.jsx',
         './jwtUtils': './src/utils/jwt.js',
+        './authService': './utils/authService.js',
       },
       shared: {
         react: {

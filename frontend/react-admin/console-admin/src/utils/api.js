@@ -1,4 +1,4 @@
-import { getAccessToken, refreshAccessToken } from './authService.js';
+import { getAccessToken, refreshAccessToken, logout } from 'sharedApp/authService';
 
 export async function fetchWithAuth(url, options = {}) {
   const headers = {
@@ -13,17 +13,18 @@ export async function fetchWithAuth(url, options = {}) {
 
   let response = await fetch(url, { ...options, headers, credentials: 'include' });
 
-  // If the token has expired, try to refresh it
+  // Если токен просрочен (401), пробуем обновить через refresh-куку
   if (response.status === 401) {
     try {
       token = await refreshAccessToken();
       headers['Authorization'] = `Bearer ${token}`;
-      
-      // Retry the original request with the new token
+
+      // Повторяем исходный запрос с новым токеном
       response = await fetch(url, { ...options, headers, credentials: 'include' });
     } catch (err) {
-      // Refresh failed — redirect user to login
-      window.dispatchEvent(new CustomEvent('auth-logout'));
+      // Если рефреш не удался — делаем полный logout
+      await logout();
+      throw err;
     }
   }
 

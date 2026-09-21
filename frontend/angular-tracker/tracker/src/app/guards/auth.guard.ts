@@ -1,19 +1,24 @@
 // src/app/guards/auth.guard.ts
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, RedirectCommand } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
+// @ts-ignore (игнорируем удалённый MFE модуль для TypeScript)
+import { getAccessToken, refreshAccessToken } from 'sharedApp/authService';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = async () => {
   const router = inject(Router);
-  
-  // Check for the presence of the token
-  const token = localStorage.getItem('token');
 
-  if (token) {
-    return true;
+  // 1. Проверяем токен в оперативной памяти
+  let token = getAccessToken();
+
+  // 2. Если токена нет в памяти, пробуем восстановить через HttpOnly Cookie
+  if (!token) {
+    try {
+      token = await refreshAccessToken();
+    } catch (err) {
+      console.warn('[AuthGuard] Access restricted: session expired or invalid cookie.');
+      return false;
+    }
   }
 
-  console.warn('[AuthGuard] Access restricted: missing authorization token.');
-
-  // Using RedirectCommand — modern standard for canceling navigation and redirecting
-  return false;
+  return Boolean(token);
 };

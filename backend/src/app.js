@@ -1,9 +1,10 @@
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
+const cookieParser = require('cookie-parser'); // 👈 1. Подключаем cookie-parser
 const authRoutes = require('./routes/authRoutes');
 const telemetryRoutes = require('./routes/telemetryRoutes');
-const initWebSocketServer = require('./services/websocket'); // WS
+const initWebSocketServer = require('./services/websocket');
 require('dotenv').config();
 
 const app = express();
@@ -20,10 +21,10 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(cookieParser()); // 👈 2. Регистрируем middleware парсинга кук
 app.use('/api/auth', authRoutes);
 app.use('/api/metrics/', telemetryRoutes);
 
-//  HTTP + WebSocket
 const server = http.createServer(app);
 initWebSocketServer(server);
 

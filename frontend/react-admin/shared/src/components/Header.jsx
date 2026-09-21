@@ -1,7 +1,7 @@
 import React from 'react';
 import { parseJwt } from '../utils/jwt';
 
-export default function Header() {
+export default function Header({ onLogout }) {
 
   const token = localStorage.getItem('token');
   const user = parseJwt(token); // Вытаскиваем { id, role, email }
@@ -39,8 +39,12 @@ export default function Header() {
         <div className="user-info">
           <span>{user.email}</span>
           <span className={`badge badge-${user.role}`}>{user.role}</span>
-          {/* <button onClick={handleLogout} type="button">Logout</button> */}
+          <button onClick={onLogout} type="button">Logout</button>
         </div>
+      )}
+
+      {!user && onLogout && (
+        <button onClick={onLogout} type="button">Logout</button>
       )}
 
     </header>

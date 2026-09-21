@@ -37,10 +37,12 @@ module.exports = {
       name: 'adminApp',
       filename: 'remoteEntry.js',
       remotes: {
+        shellHost: 'shellHost@http://localhost:5001/remoteEntry.js',
         sharedApp: 'sharedApp@http://localhost:5003/remoteEntry.js',
       },
       exposes: {
         './App': './src/App.jsx',
+        './ProtectedRoute': './src/components/ProtectedRoute',
       },
       shared: {
         react: { singleton: true, requiredVersion: '19.2.8' },

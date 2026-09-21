@@ -7,6 +7,9 @@ import TelemetryControls from './TelemetryControls';
 import SatelliteCard from './SatelliteCard';
 import './Dashboard.css';
 
+// Base API URL from environment variables or relative fallback
+const API_BASE_URL = import.meta.env?.VITE_API_URL || 'http://localhost:3000';
+
 export default function Dashboard() {
   const [satellitesList, setSatellitesList] = useState([]);
   const [selectedSatId, setSelectedSatId] = useState('sat-001');
@@ -17,19 +20,31 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Загрузка списка всех спутников при старте
+  // 1. Fetch satellite list on mount
   useEffect(() => {
+    let isMounted = true;
+
     async function loadSatellitesList() {
       try {
-        const response = await fetchWithAuth('http://localhost:3000/api/metrics/v1/satellites');
-        if (!response.ok) throw new Error(`Ошибка загрузки списка: ${response.status}`);
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/metrics/v1/satellites`);
+        if (!response.ok) throw new Error(`List fetch failed with status: ${response.status}`);
+        
         const json = await response.json();
-        if (json.success) setSatellitesList(json.data);
+        if (json.success && isMounted) {
+          setSatellitesList(json.data);
+        }
       } catch (err) {
-        console.error('Не удалось загрузить список спутников:', err);
+        if (isMounted) {
+          console.error('Failed to load satellites list:', err);
+        }
       }
     }
+
     loadSatellitesList();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSatelliteChange = useCallback((e) => {
@@ -49,21 +64,21 @@ export default function Dashboard() {
     } else {
       queryParams.append('satelliteId', satId);
     }
-    return `http://localhost:3000/api/metrics/v1?${queryParams.toString()}`;
+    return `${API_BASE_URL}/api/metrics/v1?${queryParams.toString()}`;
   }, []);
 
-  // 2. Загрузка данных телеметрии
+  // 2. Fetch telemetry metrics (Optimized: removed `cache` from dependencies)
   const loadMetrics = useCallback(async (forceRefresh = false) => {
     const url = buildUrl(selectedSatId);
 
-    if (!forceRefresh && cache[url]) return;
-
+    // Read latest cache state safely via functional setCache or ref if needed
     setLoading(true);
     setError(null);
 
     try {
       const response = await fetchWithAuth(url);
-      if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      
       const json = await response.json();
 
       if (json.success) {
@@ -77,18 +92,22 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [selectedSatId, buildUrl, cache]);
+  }, [selectedSatId, buildUrl]);
 
   useEffect(() => {
-    loadMetrics(false);
-  }, [selectedSatId, loadMetrics]);
+    const url = buildUrl(selectedSatId);
+    // Fetch only if data is not cached
+    if (!cache[url]) {
+      loadMetrics(false);
+    }
+  }, [selectedSatId, buildUrl, cache, loadMetrics]);
 
-  // Выборка из кэша
+  // Read current cache entry
   const currentCacheEntry = cache[buildUrl(selectedSatId)];
   const currentRawData = currentCacheEntry?.payload;
   const fetchedAt = currentCacheEntry?.fetchedAt;
 
-  // Динамический список имен метрик
+  // Extract available metric names
   const availableMetricNames = useMemo(() => {
     if (!currentRawData?.data) return [];
     const satellites = Array.isArray(currentRawData.data) ? currentRawData.data : [currentRawData.data];
@@ -98,19 +117,19 @@ export default function Dashboard() {
     return Array.from(namesSet);
   }, [currentRawData]);
 
-  // Фильтрация списка на основе выбранных параметров
+  // Filter satellite items based on controls
   const filteredSatellites = useMemo(() => {
     if (!currentRawData?.data) return [];
     const satellites = Array.isArray(currentRawData.data) ? currentRawData.data : [currentRawData.data];
 
     return satellites
       .map((sat) => {
-        const matchingMetrics = sat.metrics.filter((m) => {
+        const matchingMetrics = (sat.metrics || []).filter((m) => {
           const matchMetric = selectedMetricName === 'all' || m.metric === selectedMetricName;
           const matchStatus =
             selectedStatus === 'all' ||
-            m.status.color.toLowerCase() === selectedStatus.toLowerCase() ||
-            m.status.code.toLowerCase() === selectedStatus.toLowerCase();
+            m.status?.color?.toLowerCase() === selectedStatus.toLowerCase() ||
+            m.status?.code?.toLowerCase() === selectedStatus.toLowerCase();
 
           return matchMetric && matchStatus;
         });
@@ -120,7 +139,7 @@ export default function Dashboard() {
       .filter((sat) => sat.filteredMetrics.length > 0);
   }, [currentRawData, selectedMetricName, selectedStatus]);
 
-// Dynamic calculation of card height based on the number of filtered rows (45px per row + card header)
+  // Virtualizer for smooth rendering of large lists
   const rowVirtualizer = useWindowVirtualizer({
     count: filteredSatellites.length,
     estimateSize: (index) => {
@@ -143,11 +162,11 @@ export default function Dashboard() {
         availableMetricNames={availableMetricNames}
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
-        onRefresh={loadMetrics}
+        onRefresh={() => loadMetrics(true)}
         loading={loading}
       />
 
-      {error && <div className="telemetry-error">Ошибка: {error}</div>}
+      {error && <div className="telemetry-error">Error: {error}</div>}
       {loading && !currentRawData && <div className="telemetry-loading">Loading telemetry...</div>}
 
       {currentRawData && (

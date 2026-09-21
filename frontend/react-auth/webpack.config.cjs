@@ -42,6 +42,9 @@ module.exports = {
         'react-dom': { singleton: true, requiredVersion: '19.2.8' },
         'react-router-dom': { singleton: true, requiredVersion: '7.18.3' },
       },
+      remotes: {
+        sharedApp: 'sharedApp@http://localhost:5003/remoteEntry.js',
+      },
     }),
     new HtmlWebpackPlugin({
       template: './index.html',

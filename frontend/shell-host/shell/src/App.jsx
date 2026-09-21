@@ -1,123 +1,72 @@
-import React, { useState, useEffect, Suspense } from 'react';
+// shell-host/src/App.jsx
+import React, { Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
+import AngularTrackerWrapper from './components/AngularTrackerWrapper';
 
-// Dynamic imports for microfrontends (Remote Module Federation)
+// Dynamic imports for micro-frontends and exposed components
 const RemoteLoginForm = React.lazy(() => import('authApp/LoginForm'));
 const RemoteAdminApp = React.lazy(() => import('adminApp/App'));
 const RemoteMainLayout = React.lazy(() => import('sharedApp/MainLayout'));
+const ProtectedRoute = React.lazy(() => import('adminApp/ProtectedRoute'));
 
-export function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  // Check session/token on application load
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      setIsAuthenticated(false);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await fetch('http://localhost:5000/api/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      if (res.ok) {
-        setIsAuthenticated(true);
-      } else {
-        // If the token is expired/invalid — clear it
-        localStorage.removeItem('token');
-        setIsAuthenticated(false);
-      }
-    } catch {
-      // On network error, rely on the presence of the token in localStorage
-      setIsAuthenticated(Boolean(localStorage.getItem('token')));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    checkAuth();
-
-    const handleAuthChange = () => checkAuth();
-    window.addEventListener('auth-change', handleAuthChange);
-    return () => window.removeEventListener('auth-change', handleAuthChange);
-  }, []);
-
-  const handleLogout = async () => {
-    const token = localStorage.getItem('token');
-
-    try {
-      if (token) {
-        // 1. Notify the backend about logout (verify URL: /api/logout or /logout)
-        await fetch('http://localhost:5000/api/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Server logout error:', error);
-    } finally {
-      // 2. Clear localStorage
-      localStorage.removeItem('token');
-      
-      // 3. Update React state WITHOUT page reload
-      setIsAuthenticated(false);
-
-      // 4. Notify other microfrontends about auth state change
-      window.dispatchEvent(new Event('auth-change'));
-    }
-  };
-
-  if (loading) return <div style={{ padding: '20px' }}>Loading application...</div>;
+export default function App() {
+  // Use centralized in-memory auth state
+  const { token, loading, logout } = useAuth();
 
   return (
-    <div style={{ fontFamily: 'sans-serif' }}>
-      {!isAuthenticated ? (
-        /* 1. LOGIN FORM (authApp) */
-        <div style={{ padding: '20px', maxWidth: '400px', margin: '50px auto' }}>
-          <Suspense fallback={<div>Loading login form...</div>}>
-            <RemoteLoginForm onSuccess={() => {
-              setIsAuthenticated(true);
-              window.dispatchEvent(new Event('auth-change'));
-            }} />
-          </Suspense>
-        </div>
-      ) : (
-        /* 2. LAYOUT AND CONTENT (sharedApp + adminApp) */
-        <Suspense fallback={<div>Loading interface...</div>}>
-          <RemoteMainLayout>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
-              <h2>Control Panel</h2>
-              <button 
-                onClick={handleLogout} 
-                style={{ 
-                  padding: '8px 16px', 
-                  cursor: 'pointer',
-                  backgroundColor: '#dc3545',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px'
-                }}
-              >
-                Logout
-              </button>
-            </div>
+    <Suspense fallback={<div>Loading shell...</div>}>
+      <Routes>
+        {/* Public login route */}
+        <Route 
+          path="/login/*" 
+          element={
+            !token && !loading ? (
+              <RemoteLoginForm />
+            ) : (
+              <Navigate to="/admin" replace />
+            )
+          } 
+        />
 
-            <Suspense fallback={<div>Loading admin content...</div>}>
-              <RemoteAdminApp />
-            </Suspense>
-          </RemoteMainLayout>
-        </Suspense>
-      )}
-    </div>
+        {/* 🔒 Protected Route 1: Admin MFE */}
+        <Route 
+          path="/admin/*" 
+          element={
+            <ProtectedRoute token={token} isInitializing={loading} allowedRoles={['admin', 'user']}>
+              <RemoteMainLayout onLogout={logout}>
+                <RemoteAdminApp />
+              </RemoteMainLayout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+        {/* 🔒 Protected Route 2: Angular Tracker MFE */}
+        <Route 
+          path="/tracker/*" 
+          element={
+            <ProtectedRoute token={token} isInitializing={loading}>
+              <RemoteMainLayout onLogout={logout}>
+                <AngularTrackerWrapper token={token} />
+              </RemoteMainLayout>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Root URL handler: Redirects to /admin by default if authenticated */}
+        <Route 
+          path="/" 
+          element={<Navigate to={token ? "/admin" : "/login"} replace />} 
+        />
+
+        {/* Default fallback for unknown paths */}
+        <Route 
+          path="*" 
+          element={<Navigate to={token ? "/admin" : "/login"} replace />} 
+        />
+      </Routes>
+    </Suspense>
   );
 }
-
-export default App;

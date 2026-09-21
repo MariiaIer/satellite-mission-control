@@ -1,17 +1,17 @@
-const { withNativeFederation, shareAll } = require('@angular-architects/native-federation/config');
+import { withNativeFederation } from '@angular-architects/native-federation/config';
 
-module.exports = withNativeFederation({
+export default withNativeFederation({
   name: 'tracker',
 
   exposes: {
     './TrackerMount': './src/bootstrap.ts',
   },
 
-  shared: {
-    ...shareAll({ singleton: true, strictVersion: false, requiredVersion: 'auto' }),
-  },
+  // Отключаем shareAll, чтобы Native Federation не резала библиотеки на мелкие спецификаторы (tslib, cdk, primitives)
+  shared: {},
 
   skip: [
     'zone.js',
+    'sharedApp/authService',
   ]
 });

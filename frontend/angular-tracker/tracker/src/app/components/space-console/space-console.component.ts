@@ -6,7 +6,11 @@ import {
   DestroyRef, 
   afterNextRender, 
   afterRenderEffect, 
-  signal 
+  signal,
+  input,
+  effect,
+  ElementRef,
+  OnInit
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,11 +24,15 @@ import { SpaceConsoleService, SpaceMessage } from '../../services/space-console.
   templateUrl: './space-console.component.html',
   styleUrl: './space-console.component.css'
 })
-export class SpaceConsoleComponent {
+export class SpaceConsoleComponent implements OnInit {
   private readonly consoleService = inject(SpaceConsoleService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly elementRef = inject(ElementRef);
 
   private readonly viewport = viewChild<CdkVirtualScrollViewport>(CdkVirtualScrollViewport);
+
+  // 1. Signal-based input (автоматически поддерживает HTML-атрибут token="...")
+  readonly token = input<string | null>(null);
 
   readonly inputCommand = signal('');
 
@@ -33,6 +41,14 @@ export class SpaceConsoleComponent {
   readonly logs = this.consoleService.logs;
 
   constructor() {
+    // 2. Реактивный эффект: срабатывает автоматически при изменении сигнала token()
+    effect(() => {
+      const currentToken = this.token();
+      if (currentToken) {
+        this.consoleService.connectWithToken(currentToken);
+      }
+    });
+
     afterNextRender(() => {
       if (this.isAuth()) {
         this.consoleService.connect();
@@ -49,6 +65,16 @@ export class SpaceConsoleComponent {
 
       if (vp && logsCount > 0) {
         vp.scrollToIndex(logsCount - 1, 'smooth');
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    // 3. Дополнительно слушаем браузерное событие от React Wrapper
+    this.elementRef.nativeElement.addEventListener('token-updated', (event: CustomEvent<{ token?: string }>) => {
+      const newToken = event.detail?.token;
+      if (newToken) {
+        this.consoleService.connectWithToken(newToken);
       }
     });
   }

@@ -75,13 +75,14 @@ exports.login = async (req, res) => {
     await db.execute('UPDATE users SET refresh_token = ? WHERE id = ?', [hashedRefreshToken, user.id]);
 
     // Set httpOnly Cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax', 
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  });
 
     res.json({
       token: accessToken,
@@ -147,4 +148,8 @@ exports.logout = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
+
+
+
+
 };

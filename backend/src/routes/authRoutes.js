@@ -6,6 +6,7 @@ const { authenticateToken, checkRole } = require('../middlewares/authMiddleware'
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/logout', authenticateToken, authController.logout);
+router.post('/refresh', authController.refreshToken);
 
 router.get('/admin', authenticateToken, checkRole(['admin']), (req, res) => {
   res.json({ message: 'Admin access only' });
