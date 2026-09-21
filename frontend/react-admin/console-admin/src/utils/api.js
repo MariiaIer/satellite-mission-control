@@ -13,16 +13,16 @@ export async function fetchWithAuth(url, options = {}) {
 
   let response = await fetch(url, { ...options, headers, credentials: 'include' });
 
-  // Если токен просрочен (401), пробуем обновить через refresh-куку
+  // If the token is expired (401), attempt to renew it using the HttpOnly refresh cookie
   if (response.status === 401) {
     try {
       token = await refreshAccessToken();
       headers['Authorization'] = `Bearer ${token}`;
 
-      // Повторяем исходный запрос с новым токеном
+      // Retry the original request with the new access token
       response = await fetch(url, { ...options, headers, credentials: 'include' });
     } catch (err) {
-      // Если рефреш не удался — делаем полный logout
+      // If the refresh token request fails, perform a full logout
       await logout();
       throw err;
     }

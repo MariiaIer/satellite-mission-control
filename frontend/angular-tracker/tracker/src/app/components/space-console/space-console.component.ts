@@ -31,7 +31,7 @@ export class SpaceConsoleComponent implements OnInit {
 
   private readonly viewport = viewChild<CdkVirtualScrollViewport>(CdkVirtualScrollViewport);
 
-  // 1. Signal-based input (автоматически поддерживает HTML-атрибут token="...")
+  // 1. Signal-based input (automatically supports the HTML attribute token="...")
   readonly token = input<string | null>(null);
 
   readonly inputCommand = signal('');
@@ -41,7 +41,7 @@ export class SpaceConsoleComponent implements OnInit {
   readonly logs = this.consoleService.logs;
 
   constructor() {
-    // 2. Реактивный эффект: срабатывает автоматически при изменении сигнала token()
+    // 2. Reactive effect: triggers automatically whenever the token() signal changes
     effect(() => {
       const currentToken = this.token();
       if (currentToken) {
@@ -70,7 +70,7 @@ export class SpaceConsoleComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // 3. Дополнительно слушаем браузерное событие от React Wrapper
+    // 3. Additionally listen for the browser custom event from the React Wrapper
     this.elementRef.nativeElement.addEventListener('token-updated', (event: CustomEvent<{ token?: string }>) => {
       const newToken = event.detail?.token;
       if (newToken) {

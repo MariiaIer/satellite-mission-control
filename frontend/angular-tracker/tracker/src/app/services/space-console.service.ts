@@ -18,12 +18,12 @@ export class SpaceConsoleService {
   private socket?: WebSocket;
   private readonly MAX_LOGS_LIMIT = 1000;
 
-  // Реактивные сигналы состояния
+  // Reactive state signals
   private readonly tokenSignal = signal<string | null>(null);
   private readonly isConnectedSignal = signal<boolean>(false);
   private readonly logsSignal = signal<SpaceMessage[]>([]);
 
-  // Публичные ридопли-сигналы и геттеры
+  // Public readonly signals and getters
   public readonly isAuth = computed(() => !!this.tokenSignal());
   public readonly isConnected = this.isConnectedSignal.asReadonly();
   public readonly logs = this.logsSignal.asReadonly();
@@ -52,7 +52,7 @@ export class SpaceConsoleService {
   }
 
   /**
-   * 🚀 Публичный метод для установки токена напрямую из Custom Element / Компонента
+   * 🚀 Public method to set the token directly from a Custom Element / Component
    */
   public connectWithToken(token: string | null): void {
     if (!token) {
@@ -66,7 +66,7 @@ export class SpaceConsoleService {
   }
 
   /**
-   * Вспомогательный метод синхронизации состояния подключения
+   * Helper method to synchronize connection state
    */
   private updateTokenState(newToken: string | null): void {
     this.tokenSignal.set(newToken);
@@ -79,7 +79,7 @@ export class SpaceConsoleService {
     }
   }
 
-  // Безопасное получение authService в рантайме
+  // Safely retrieve authService at runtime
   private async getAuthService(): Promise<any> {
     try {
       const win = window as any;

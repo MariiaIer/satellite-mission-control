@@ -38,7 +38,7 @@ export async function mount(container: HTMLElement, props: { token?: string } = 
 //   if (document.readyState === 'loading') {
 //     window.addEventListener('DOMContentLoaded', runStandalone);
 //   } else {
-//     // Если DOM уже загружен, запускаем сразу
+//     
 //     runStandalone();
 //   }
 // }

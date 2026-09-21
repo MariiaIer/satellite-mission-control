@@ -7,7 +7,7 @@ export default withNativeFederation({
     './TrackerMount': './src/bootstrap.ts',
   },
 
-  // Отключаем shareAll, чтобы Native Federation не резала библиотеки на мелкие спецификаторы (tslib, cdk, primitives)
+  
   shared: {},
 
   skip: [

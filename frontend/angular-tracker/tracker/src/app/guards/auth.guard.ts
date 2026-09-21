@@ -1,16 +1,16 @@
 // src/app/guards/auth.guard.ts
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-// @ts-ignore (игнорируем удалённый MFE модуль для TypeScript)
+// @ts-ignore (ignore remote MFE module for TypeScript)
 import { getAccessToken, refreshAccessToken } from 'sharedApp/authService';
 
 export const authGuard: CanActivateFn = async () => {
   const router = inject(Router);
 
-  // 1. Проверяем токен в оперативной памяти
+  // 1. Check for the token in in-memory storage
   let token = getAccessToken();
 
-  // 2. Если токена нет в памяти, пробуем восстановить через HttpOnly Cookie
+  // 2. If no token is found in memory, attempt to restore it via HttpOnly Cookie
   if (!token) {
     try {
       token = await refreshAccessToken();

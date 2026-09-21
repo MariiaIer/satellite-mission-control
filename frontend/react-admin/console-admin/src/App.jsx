@@ -2,28 +2,28 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 
-// 1. ИМПОРТИРУЕМ ЛОКАЛЬНЫЙ PROTECTED ROUTE
-import ProtectedRoute from './components/ProtectedRoute'; // Проверьте путь относительно App.jsx (обычно './components/ProtectedRoute')
+// 1. IMPORT LOCAL PROTECTED ROUTE
+import ProtectedRoute from './components/ProtectedRoute'; 
 
 import { getAccessToken, refreshAccessToken } from 'sharedApp/authService';
 
-// 2. ЛЕНИВЫЙ ИМПОРТ ИЗ MODULE FEDERATION
+// 2. LAZY IMPORTS FROM MODULE FEDERATION
 const AngularTrackerWrapper = React.lazy(() => import('shellHost/AngularTrackerWrapper'));
 const MainLayout = React.lazy(() => import('sharedApp/MainLayout'));
 
 export default function App() {
-  // Берем начальное значение из памяти authService
+  // Get initial value from authService in-memory storage
   const [userToken, setUserToken] = useState(() => getAccessToken());
-  // Флаг ожидания восстановления сессии по HttpOnly cookie при F5
+  // Flag to wait for session restoration via HttpOnly cookie on F5 refresh
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    // Восстановление сессии при первой загрузке / F5
+    // Restore session on initial load / F5 refresh
     async function initAuth() {
       try {
         let token = getAccessToken();
         if (!token) {
-          // Если в памяти пусто, пробуем запросить новый token по HttpOnly cookie
+          // If in-memory storage is empty, try to request a new token via HttpOnly cookie
           token = await refreshAccessToken();
         }
         setUserToken(token);
@@ -37,7 +37,7 @@ export default function App() {
 
     initAuth();
 
-    // Слушаем изменение токена из всех микрофронтендов (sharedApp, react-auth, angular)
+    // Listen for token changes from all microfrontends (sharedApp, react-auth, angular)
     const handleAuthChange = (event) => {
       const newToken = event.detail?.token ?? getAccessToken();
       setUserToken(newToken);
@@ -50,7 +50,7 @@ export default function App() {
     };
   }, []);
 
-  // Пока идет запрос /refresh при F5, показываем экраны загрузки (НЕ редиректим)
+  // Show loading screen while the /refresh request is pending on F5 (DO NOT redirect)
   if (isInitializing) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'sans-serif' }}>
@@ -64,7 +64,7 @@ export default function App() {
       <Routes>
         <Route index element={<Navigate to="dashboard" replace />} />
         
-        {/* Защищенный Dashboard (доступен admin и manager) */}
+        {/* Protected Dashboard */}
         <Route 
           path="dashboard" 
           element={
@@ -74,7 +74,7 @@ export default function App() {
           } 
         />
         
-        {/* Защищенный User List (доступен только admin) */}
+        {/* Protected User List */}
         <Route 
           path="users" 
           element={
@@ -84,7 +84,7 @@ export default function App() {
           } 
         />
         
-        {/* Защищенный Angular MFE — передаем восстановленный токен */}
+        {/* Protected Angular MFE — passing the restored token */}
         <Route 
           path="/tracker/*" 
           element={
