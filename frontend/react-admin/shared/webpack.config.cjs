@@ -27,7 +27,7 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/,
         resolve: {
-          fullySpecified: false, // Отключает жесткие требования к расширениям файла .js
+          fullySpecified: false,
         },
       },
       {

@@ -52,7 +52,7 @@ export const refreshAccessToken = async () => {
       const res = await fetch('http://localhost:3000/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Обязательно передает HttpOnly куку
+        credentials: 'include', // pass HttpOnly cookies
       });
 
       if (!res.ok) {
@@ -61,7 +61,6 @@ export const refreshAccessToken = async () => {
 
       const data = await res.json();
       
-      // 👈 Поддерживаем оба варианта названия поля
       const newToken = data.token || data.accessToken; 
       
       if (!newToken) {

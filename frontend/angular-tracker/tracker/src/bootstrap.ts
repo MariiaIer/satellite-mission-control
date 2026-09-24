@@ -23,22 +23,3 @@ export async function mount(container: HTMLElement, props: { token?: string } = 
     element.setAttribute('token', props.token);
   }
 }
-
-// 🚀 LOCALHOST:5004
-// const runStandalone = () => {
-//   const target = document.getElementById('app-root') || document.body;
-//   if (target && !target.querySelector('angular-tracker-element')) {
-//     mount(target).catch((err) =>
-//       console.error('[Angular Tracker Standalone Error]:', err)
-//     );
-//   }
-// };
-
-// if (typeof window !== 'undefined') {
-//   if (document.readyState === 'loading') {
-//     window.addEventListener('DOMContentLoaded', runStandalone);
-//   } else {
-//     
-//     runStandalone();
-//   }
-// }
